@@ -132,6 +132,26 @@
         <script src="{{ MEDIA_URL }}js/plugins.js"></script>
         <script src="{{ MEDIA_URL }}js/main.js"></script>
 
+        {% block extrajs %}
+        <!-- tablesorter -->
+	    <!-- Pick a theme, load the plugin & initialize plugin -->
+        <link href="{{ MEDIA_URL }}css/theme.default.css" rel="stylesheet">
+        <script src="{{ MEDIA_URL }}js/jquery.tablesorter.min.js"></script>
+        <script src="{{ MEDIA_URL }}js/jquery.tablesorter.widgets.min.js"></script>
+        <script type="text/javascript">
+        $(function(){
+            $('table.tablesorter').tablesorter({
+                widgets        : ['zebra', 'columns'],
+                usNumberFormat : false,
+                sortReset      : true,
+                sortRestart    : true
+            });
+        });
+        </script>
+
+        {% endblock extrajs %}
+        {#
+        {% block tracking %}
         <!--
         <script>
             var _gaq=[['_setAccount','UA-XXXXX-X'],['_trackPageview']];
@@ -140,5 +160,7 @@
             s.parentNode.insertBefore(g,s)}(document,'script'));
         </script>
         -->
+        {% endblock tracking %}
+        #}
     </body>
 </html>
