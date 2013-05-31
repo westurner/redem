@@ -1,0 +1,4 @@
+data/
+syntax:glob
+*.pyc
+*.egg-info
