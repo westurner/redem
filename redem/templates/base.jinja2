@@ -139,16 +139,58 @@
         <script src="{{ MEDIA_URL }}js/jquery.tablesorter.min.js"></script>
         <script src="{{ MEDIA_URL }}js/jquery.tablesorter.widgets.min.js"></script>
         <script type="text/javascript">
+
+
+        $.extend($.tablesorter.themes.bootstrap, {
+            // these classes are added to the table. To see other table classes available,
+            // look here: http://twitter.github.com/bootstrap/base-css.html#tables
+            table      : 'table table-bordered',
+            header     : 'bootstrap-header', // give the header a gradient background
+            footerRow  : '',
+            footerCells: '',
+            icons      : '', // add "icon-white" to make them white; this icon class is added to the <i> in the header
+            sortNone   : 'bootstrap-icon-unsorted',
+            sortAsc    : 'icon-chevron-up',
+            sortDesc   : 'icon-chevron-down',
+            active     : '', // applied when column is sorted
+            hover      : '', // use custom css here - bootstrap class may not override it
+            filterRow  : '', // filter row class
+            even       : 'even', // odd row zebra striping
+            odd        : 'odd'  // even row zebra striping,
+        });
+
         $(function(){
             $('table.tablesorter').tablesorter({
-                widgets        : ['zebra', 'columns'],
+                // this will apply the bootstrap theme if "uitheme" widget is included
+                // the widgetOptions.uitheme is no longer required to be set
+                theme : "bootstrap",
+                headerTemplate : '{content} {icon}', // new in v2.7. Needed to add the bootstrap icon!
+                widthFixed: true,
+
+                widgets        : ['uitheme', 'filter', 'zebra', 'columns', 'stickyheaders'],
                 usNumberFormat : false,
                 sortReset      : true,
-                sortRestart    : true
+                sortRestart    : true,
+                widgetOptions  : {
+                    // using the default zebra striping class name, so it actually isn't included in the theme variable above
+                    // this is ONLY needed for bootstrap theming if you are using the filter widget, because rows are hidden
+                    zebra : ["even", "odd"],
+                    // reset filters button
+                    filter_reset : ".reset",
+                    stickyheaders: 'tablesorter-stickyHeader',
+                }
             });
         });
         </script>
-
+        <style>
+            /* tablesorter stickyheaders workaround for sticky topnav */
+            table.tablesorter-sticky-visible {
+                margin-top: -40px !important;
+                padding-top: 80px !important;
+                border-bottom: 6px solid #eaeaea !important;
+                background: white;
+            }
+        </style>
         {% endblock extrajs %}
         {#
         {% block tracking %}
