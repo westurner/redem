@@ -10,13 +10,19 @@ redem - backup personal reddit history for easier local search
 https://github.com/reddit/reddit/wiki/API
 """
 __APPNAME__ = "redem"
-__VERSION__ = "0.0.1"
+__VERSION__ = "0.0.4"
+__USER_AGENT__ = '%s (praw)\%s' % (__APPNAME__, __VERSION__)
+
 import datetime
 import logging
-from operator import attrgetter
-log = logging.getLogger('%s.cli' % __APPNAME__)
+import os.path
+import rfc3987
+from jinja2 import Markup
+from collections import Counter
+from operator import attrgetter, itemgetter
 
-USER_AGENT = '%s (praw)\%s' % (__APPNAME__, __VERSION__)
+uri_rgx = rfc3987.get_compiled_pattern('URI')
+log = logging.getLogger('%s.cli' % __APPNAME__)
 
 SUBMISSION_ATTRS = (
     'id',
@@ -57,22 +63,25 @@ def get_subreddit_url(subreddit, subreddit_id):
     url = _SUBREDDIT_URLS.setdefault(subreddit_id, subreddit.url)
     return url
 
+
 _SUBREDDIT_NAMES = {}
 def get_subreddit_name(subreddit, subreddit_id):
     name = _SUBREDDIT_NAMES.setdefault(subreddit_id, subreddit.display_name)
     return name
+
 
 _SUBMISSION_URLS = {}
 def get_submission_url(submission):
     url = _SUBMISSION_URLS.setdefault(submission.id, submission.url)
     return url
 
+
 _SUBMISSION_PERMALINKS = {}
 def get_submission_permalink(submission):
     url = _SUBMISSION_PERMALINKS.setdefault(submission.id, submission.permalink)
     return url
 
-import os.path
+
 def comment_permalink(comment):
     return os.path.join(
             get_submission_permalink(comment.submission),
@@ -80,6 +89,7 @@ def comment_permalink(comment):
     #return (
     #    u"http://reddit.com/r/{subreddit}/comments/{link_id}/{_link_title}/{id}".
     #    format(**comment))
+
 
 _get_comment_attrs = attrgetter(*COMMENT_ATTRS)
 def comment_to_dict(comment):
@@ -92,6 +102,7 @@ def comment_to_dict(comment):
     _comment['permalink'] = comment_permalink(comment)
     return _comment
 
+
 _get_submission_attrs = attrgetter(*SUBMISSION_ATTRS)
 def submission_to_dict(submission):
     _sub_attrs = _get_submission_attrs(submission)
@@ -103,6 +114,7 @@ def submission_to_dict(submission):
             submission.subreddit_id)
     return _sub
 
+
 def iter_comments(user, limit=None):
     done = False
     while not done:
@@ -110,6 +122,7 @@ def iter_comments(user, limit=None):
         for comment in comments:
             yield comment
         done = True
+
 
 def iter_submissions(user, limit=None):
     done = False
@@ -128,43 +141,57 @@ def iter_liked(user, limit=None):
             yield liked
         done = True
 
-def iter_comment_uris(comments):
-    import rfc3987
-    uri_rgx = rfc3987.get_compiled_pattern('URI')
 
-    for comment in comments:
-        yield comment['permalink']
-        uri_lists = (uri_rgx.findall(c.body) for c in comments)
-        for uri_list in uri_lists:
-            for uri in uri_list:
-                if uri.lower().startswith('http'): # TODO
-                    yield uri
-                else:
-                    log.debug('NOT a URI: %r' % uri)
-                    # TODO: URI CURIEs (dbpedia-owl:Thing)
-                    # assert ':' in uri
-                    # prefix, rest = uri.split(':',1)[0], rest
-                    # prefix = uri.schema
-                    # rest = (uri.host, uri.port, uri.path, uri.query,
-                    #        uri.fragment)
-                    # prefix_uri = ONTOLOGY_CONTEXT.get(prefix, None)
-                    # if prefix_uri:
-                    #    yield urljoin(prefix_uri, rest)
-                    #
-                    # TODO: PIP urls (git+git://, git+https://, hg+https://)
+def iter_uris(text):
+    for uri in uri_rgx.findall(text):
+        if uri.lower().startswith('http'): # TODO
+            yield uri
+        else:
+            log.debug('NOT a URI: %r' % uri)
+            # TODO: URI CURIEs (dbpedia-owl:Thing)
+            # assert ':' in uri
+            # prefix, rest = uri.split(':',1)[0], rest
+            # prefix = uri.schema
+            # rest = (uri.host, uri.port, uri.path, uri.query,
+            #        uri.fragment)
+            # prefix_uri = ONTOLOGY_CONTEXT.get(prefix, None)
+            # if prefix_uri:
+            #    yield urljoin(prefix_uri, rest)
+            #
+            # TODO: PIP urls (git+git://, git+https://, hg+https://)
 
 
-def redem(username='westurner', limit=50, output_filename='data.json'):
+def iter_comment_uris(comment):
+    #yield '/'.join(comment['permalink'].split('/')[:-1])
+    yield comment['permalink']
+    for uri in iter_uris(comment['body_html']):
+        yield uri
+
+
+def iter_submission_uris(submission):
+    permalink = submission.get("permalink")
+    if permalink:
+        yield permalink
+    url = submission.get('url')
+    if url:
+        yield url
+
+    selftext = submission.get("selftext")
+    if selftext:
+        for uri in iter_uris(selftext):
+            yield uri
+
+
+def redem(username, limit=50, output_filename='data.json'):
     """
     get reddit data for username
     write it to output_filename as json
 
     return iterator of all URIs found
     """
-
     import praw
 
-    r = praw.Reddit(user_agent=USER_AGENT)
+    r = praw.Reddit(user_agent=__USER_AGENT__)
     r.config.decode_html_entities = True  # XXX
     r.login(username)
     user = r.get_redditor(username)
@@ -188,41 +215,44 @@ def redem(username='westurner', limit=50, output_filename='data.json'):
         'submissions': [submission_to_dict(s) for s in submissions],
         #'liked': [submission_to_dict(l) for l in liked]
     }
+    uris = sorted(iter_all_uris(data))
+    data['uris'] = sorted(Counter(uris).iteritems(), key=itemgetter(0))
 
     return data
 
 
 import json
-def dump(data, output_filename=None):
+def dump(data, filename=None):
+    output_filename = os.path.abspath(os.path.expanduser(filename))
     with codecs.open(output_filename, 'w+', encoding='utf-8') as fp:
         return json.dump(data, fp)
 
+
 import codecs
 def load(_file=None, filename=None):
+    input_filename = os.path.abspath(os.path.expanduser(filename))
     if _file:
         return json.load(_file)
     elif filename:
-        with codecs.open(filename, 'r', encoding='utf-8') as fp:
+        with codecs.open(input_filename, 'r', encoding='utf-8') as fp:
             return json.load(fp)
 
 
-def iter_uris(data):
+def iter_all_uris(data):
     comments = data['comments']
     submissions = data['submissions']
 
-    for uri in iter_comment_uris(comments):
-        yield uri
+    for comment in comments:
+        for uri in iter_comment_uris(comment):
+            yield uri
 
-    for sub in submissions:
-        permalink = sub.get("permalink")
-        if permalink:
-            yield permalink
-        url = sub.get('url')
-        if url:
-            yield url
+    for submission in submissions:
+        for uri in iter_submission_uris(submission):
+            yield uri
 
     #_comments = (x for x in uri_rgx.findall(c.body) for c in comments)
     #print(list(_comments))
+
 
 def site_frequencies(uri_iterable):
     import urlparse
@@ -240,8 +270,9 @@ def site_frequencies(uri_iterable):
             'by_site': by_site}
 
 
-def redem_summary(data, **kwargs):
-    from jinja2 import Markup
+def prepare_context_data(data):
+    # TODO: data = data.copy()
+    # TODO: data['prov'] = ...
     html_keys = {'body_html':0, 'selftext_html':0}
     link_keys = {'permalink':0, 'link': 0}
     date_keys = {'created':0, 'created_utc':0, 'edited': 0}
@@ -263,26 +294,40 @@ def redem_summary(data, **kwargs):
                     if _orig:
                         _dt = datetime.datetime.fromtimestamp(_orig)
                         _data[key] = _dt.strftime('%Y-%m-%d-%H:%M:%S')
+    return data
 
-    context = {
-            'data': data,
-            'title': 'redem_summary',
-            'username': (
-                data.get('_meta',{})
-                    .get('username', kwargs.get('username'))),
-    }
-    context.update(kwargs)
 
+def redem_summary_context(data, **kwargs):
+    context = {}
+    context['username'] = data.get('_meta',{}).get('username')
+    context['data'] = prepare_context_data(data)
+    context['title'] = (
+        Markup(u"%s @ reddit -- redem summary") % context['username']
+    )
+    context.update(kwargs) # TODO, FIXME, XXX
+    return context
+
+
+def get_template_env():
     from jinja2 import Environment, PackageLoader  # FileSystemLoader
-    #import os.path
     env = Environment(
         #loader=FileSystemLoader(os.path.dirname(__file__)),
         loader=PackageLoader('redem', 'templates'),
         autoescape=True,
-        ) # TODO FIXME XXX
+        )
+    return env
 
-    t = env.get_template('redem_summary.jinja2')
-    return t.render(context)
+
+def redem_summary(data, **kwargs):
+    context = redem_summary_context(data, **kwargs)
+    env = get_template_env()
+    template = env.get_template('redem_summary.jinja2')
+    return template.render(context)
+
+
+def write_html(filename, content):
+    with codecs.open(filename, 'w+', encoding='utf-8') as fp:
+        fp.write(content)
 
 
 import unittest
@@ -295,30 +340,37 @@ class Test_redem(unittest.TestCase):
 
     def test_redem_summary(self):
         data = load(filename='../data/data.json')
+        self.assertTrue(data)
 
-        print( redem_summary(data).encode('utf8',errors='xmlcharrefreplace') )
+        output = redem_summary(data)
+        assert '<title>' in output
 
+    def test_iter_uris(self):
+        text = u'https://en.wikipedia.org/wiki/Command-line_interface\n\nhttps://en.wikipedia.org/wiki/Command-line_argument_parsing#Python\n\nhttps://en.wikipedia.org/wiki/Python_(programming_language)\n\n\n[Automated testing](http://www.reddit.com/r/Python/comments/1drv59/getting_started_with_automated_testing/c9tfxgd) is much easier when there is a `main` function.\n\nMinimally, in Unix style:\n\n    def main():\n        \'\'\'Prints "Hello World!"\'\'\'\n        print("Hello world!")\n        return 0\n\n    if __name__ == \'__main__\':\n        import sys\n        sys.exit(main())\n\n* http://docs.python.org/2.6/library/optparse.html\n* http://docs.python.org/2.7/library/argparse.html\n* http://docs.python.org/3/library/argparse.html\n\nFrom [the list of PyPi Trove Classifiers](https://pypi.python.org/pypi?%3Aaction=list_classifiers):\n\n    Environment :: Console\n'
+        uris = list( iter_uris(text) )
+        self.assertTrue(len(uris))
 
 def main():
     import optparse
     import logging
     import datetime
 
-    prs = optparse.OptionParser(usage="./%prog : args")
+    prs = optparse.OptionParser(usage="./%prog <username>")
 
     prs.add_option('-b', '--backup',
                     dest='backup',
                     action='store_true')
 
-    prs.add_option('--html',
+    prs.add_option('-r','--html',
                     dest='html_report',
                     action='store_true')
-    prs.add_option('-o',
+    prs.add_option('-o','--html-output',
                     dest='html_output_filename',
                     action='store',
+                   #default='-',
                     default=(
                         'report_%s.html' % (
-                            datetime.datetime.now().strftime('%YMD%h%m')
+                            datetime.datetime.now().strftime('%Y%M%D%h%m')
                         ))
                     )
     prs.add_option('--media-url',
@@ -328,10 +380,10 @@ def main():
                     )
 
 
-    prs.add_option("--json",
-                   dest="json_filename",
-                   action="store",
-                   default="data.json",
+    prs.add_option('-j','--json',
+                   dest='json_filename',
+                   action='store',
+                   default='data.json',
                    )
 
     prs.add_option('-v', '--verbose',
@@ -359,7 +411,7 @@ def main():
         sys.exit(unittest.main())
 
     username = None
-    if (opts.backup): # or opts.html_report):
+    if (opts.backup):
         if not len(args):
             raise Exception("must specify a username")
 
@@ -369,18 +421,21 @@ def main():
     data = None
     if opts.backup:
         data = redem(username, opts.backup)
-        dump(data, output_filename=opts.json_filename)
+        dump(data, filename=opts.json_filename)
 
     if data is None:
         data = load(filename=opts.json_filename)
 
     if opts.html_report:
-        #uris = redem(username, output_filename=opts.html_output_filename)
         output_html = redem_summary(data,
                 media_url=opts.media_url,
                 username=username)
-        with codecs.open(opts.html_output_filename, 'w+', encoding='utf-8') as fp:
-            fp.write(output_html)
+        if opts.html_output_filename.strip() == '-':
+            import sys
+            sys.stdout.write(opts.output_html)
+        else:
+            write_html(opts.html_output_filename, output_html)
+
 
 
 if __name__ == "__main__":
