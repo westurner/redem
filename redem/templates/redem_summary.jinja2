@@ -23,11 +23,11 @@
 
       <table class="table table-border table-striped table-hover table-condensed tablesorter">
       <thead>
-        <th>created</th>
-        <th>title</th>
-        <th>subreddit</th>
-        <th>n-chars</th>
-        <th>score</th>
+        <th style="width:7%"  class="filter-match">created</th>
+        <th style="width:80%" class="filter-match">title</th>
+        <th style="width:5%" class="filter-select ">subreddit</th>
+        <th style="width:5%"  class="filter-false">n-chars</th>
+        <th style="width:3%"  class="filter-false">score</th>
       </thead>
 
       <tbody>
@@ -84,11 +84,11 @@
 
       <table class="table table-border table-striped table-hover table-condensed tablesorter">
       <thead>
-        <th>created</th>
-        <th>title</th>
-        <th>subreddit</th>
-        <th>n-chars</th>
-        <th>score</th>
+        <th style="width:7%"  class="filter-match">created</th>
+        <th style="width:80%" class="filter-match">title</th>
+        <th style="width:5%" class="filter-select ">subreddit</th>
+        <th style="width:5%"  class="filter-false">n-chars</th>
+        <th style="width:3%"  class="filter-false">score</th>
       </thead>
 
       <tbody>
@@ -147,17 +147,20 @@
           <a class="urls" id="urls" href="#top">URLs</a>
       </h2>
 
-      <table class="table table-border table-striped table-hover table-condensed tablesorter">
+      <table 
+          class="table table-border table-striped table-hover table-condensed tablesorter"
+          style="table-layout:fixed; word-wrap: break-word;"
+          >
       <thead>
-        <th>URL</th>
-        <th>count</th>
+        <th class="filter-false" style="width: 5%">count</th>
+        <th class="filter-match" style="width: 95%">URL</th>
       </thead>
 
       <tbody>
       {% for uri, count in data['uris'] %}
       <tr>
-          <td><a href="{{ uri }}">{{ uri }}</a></td>
           <td>{{ count }}</td>
+          <td><a href="{{ uri }}">{{ uri }}</a></td>
       {% endfor %}
       </tbody>
       </table>

@@ -55,6 +55,12 @@
                 padding-top: 4px;
                 padding-bottom: 4px;
             }
+
+
+            /* fix for tablesorter ~ with default table-layout: auto */
+            table.tablesorter tr.tablesorter-filter-row input {
+                width: 80% !important;
+            } 
         </style>
         <link rel="stylesheet" href="{{ MEDIA_URL }}css/bootstrap-responsive.min.css">
         <link rel="stylesheet" href="{{ MEDIA_URL }}css/main.css">

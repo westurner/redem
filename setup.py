@@ -6,6 +6,7 @@ def read(fname):
 
 INSTALL_REQUIRES=[
    'praw',
+   'requests_cache',
 ]
 
 setup(

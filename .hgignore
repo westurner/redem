@@ -1,4 +1,5 @@
 data/
+redem/static/output.html
 syntax:glob
 *.pyc
 *.egg-info
