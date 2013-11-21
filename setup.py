@@ -5,13 +5,15 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 INSTALL_REQUIRES=[
-   'praw',
-   'requests_cache',
+    'praw',
+    'rfc3987',
+    'Jinja2',
+    'requests_cache',
 ]
 
 setup(
     name = "redem",
-    version = "0.0.1",
+    version = "0.0.2",
     #author = "",
     #author_email = "wes@wrd.nu",
     #description = (""),
