@@ -464,6 +464,7 @@ def main():
                     action='store_true')
     prs.add_option('-C', '--no-cache',
                     dest='no_cache',
+                    default=False,
                     action='store_true')
 
     prs.add_option('-r','--html',
