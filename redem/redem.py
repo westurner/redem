@@ -143,12 +143,20 @@ def iter_liked(user, limit=None):
         done = True
 
 
-def iter_uris(text):
+def iter_uris(text, filterfunc=None):
+    """
+    Yield things that look like URIs from the given text
+
+    :param filterfunc: callable to filter urls, defaults to .startswith('http')
+    """
+    if filterfunc is None:
+        filterfunc = lambda uri: uri[4].lower() == 'http'
+
     for uri in uri_rgx.findall(text):
-        if uri.lower().startswith('http'): # TODO
+        if filterfunc(uri):
             yield uri
         else:
-            log.debug('NOT a URI: %r' % uri)
+            log.debug('filtered_uri: %r' % uri)
             # TODO: URI CURIEs (dbpedia-owl:Thing)
             # assert ':' in uri
             # prefix, rest = uri.split(':',1)[0], rest
