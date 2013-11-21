@@ -207,6 +207,9 @@ def canonicalize_uri(uri):
     return _uri
 
 
+URIThing = collections.namedtuple('URIThing',
+            ('uri', 'canonical_uri', 'source_obj'))
+
 def iter_all_uris(data):
     """
     :returns: iterator of (uri, canonical_uri, source_obj)
@@ -216,7 +219,7 @@ def iter_all_uris(data):
 
     for comment in comments:
         for uri in iter_comment_uris(comment):
-            yield (uri, canonicalize_uri(uri), comment)
+            yield URIThing(uri, canonicalize_uri(uri), comment)
 
     for submission in submissions:
         for uri in iter_submission_uris(submission):
