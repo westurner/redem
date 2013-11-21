@@ -223,7 +223,59 @@ def iter_all_uris(data):
 
     for submission in submissions:
         for uri in iter_submission_uris(submission):
-            yield (uri, canonicalize_uri(uri), comment)
+            yield URIThing(uri, canonicalize_uri(uri), comment)
+
+
+class URIRefCounter(collections.OrderedDict):
+
+    @staticmethod
+    def keyfunc(obj):
+        return obj.canonical_uri
+
+    @staticmethod
+    def valuefunc(obj):
+        return (obj.uri, obj.source_obj) # source_obj_uri TODO
+
+    def push(self, obj, return_count=False, return_reflist=False):
+        """
+        append a URI to the counter # TODO:
+        :param uri: uri(uri, canonical_uri, source)
+        """
+        #reflist = self.reflist = getattr(self, 'reflist', self.get_default(self.keyfunc(obj), list)
+        #reflist.append( self.valuefunc(obj) )
+
+        key = URIRefCounter.keyfunc(obj)      # obj.canonical_uri
+        val = URIRefCounter.valuefunc(obj)    # obj.uri, obj.source_obj
+
+        l = self.setdefault(key, default=[])
+        l.append(val)
+        if return_count:
+            return len(l)
+        if return_reflist:
+            return l
+
+
+    def counts(self):
+        for key, refs in self.iteritems():
+            yield (key, len(refs), refs)
+
+
+    def print(self, counts=None):
+        for key, count, refs in counts or self.counts():
+            print(key, count, refs)
+
+
+    @classmethod
+    def group_and_count(cls, iterable, keyfunc=None, valuefunc=None):
+        self = cls()
+        if keyfunc:
+            self.keyfunc = keyfunc
+        if valuefunc:
+            self.valuefunc = valuefunc
+        for obj in iterable:
+            self.push(obj)
+        #return self.counts()
+        return self
 
 
 def redem(username, output_filename='data.json'):
@@ -269,43 +321,6 @@ def redem(username, output_filename='data.json'):
     uris = sorted(uri_iter)
     # OrderedDefaultDict (OrderedCounter)
 
-    class URIRefCounter(collections.OrderedDict):
-
-        keyfunc = lambda x: x[1]
-        valuefunc = lambda x: (x[0], x[2])
-        def push(self, obj, return_count=False, return_reflist=False):
-            """
-            append a URI to the counter # TODO:
-            :param uri: uri(uri, canonical_uri, source)
-            """
-            reflist = self.get_default(self.keyfunc(obj), list)
-            reflist.append( self.valuefunc(obj) )
-            if return_count:
-                return len(reflist)
-            if return_reflist:
-                return reflist
-
-
-        def counts(self):
-            for key, refs in self.iteritems():
-                yield (key, len(refs), refs)
-
-
-        def print(self, counts=None):
-            for key, count, refs in counts or self.counts():
-                print(key, count, refs)
-
-
-        @classmethod
-        def group_and_count(cls, iterable, keyfunc=None, valuefunc=None):
-            self = cls()
-            if keyfunc:
-                self.keyfunc = keyfunc
-            if valuefunc:
-                self.valuefunc = valuefunc
-            for obj in iterable:
-                self.push(obj)
-            return self.counts()
 
 
     uri_refs = URIRefCounter.group_and_count(uris)
