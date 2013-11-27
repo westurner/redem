@@ -7,6 +7,7 @@ def read(fname):
 INSTALL_REQUIRES=[
     'praw',
     'rfc3987',
+    'BeautifulSoup4',
     'Jinja2',
     'requests_cache',
 ]

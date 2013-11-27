@@ -17,6 +17,7 @@ import datetime
 import logging
 import os.path
 import rfc3987
+import bs4
 import praw
 from jinja2 import Markup
 import collections
@@ -152,7 +153,7 @@ def iter_liked(user, limit=None):
         done = True
 
 
-def iter_uris(text, filterfunc=None):
+def iter_uris_regex(text, filterfunc=None):
     """
     Yield things that look like URIs from the given text
 
@@ -179,6 +180,15 @@ def iter_uris(text, filterfunc=None):
             # TODO: PIP urls (git+git://, git+https://, hg+https://)
 
 
+def iter_uris_bs4(text):
+    bs = bs4.BeautifulSoup(text)
+    links = bs.find_all('a')
+    for link in links:
+        yield link.get('href')  # link.text
+
+iter_uris = iter_uris_regex
+
+
 def iter_comment_uris(comment):
     #yield '/'.join(comment['permalink'].split('/')[:-1])
     yield comment['permalink']
@@ -194,7 +204,7 @@ def iter_submission_uris(submission):
     if url:
         yield url
 
-    selftext = submission.get("selftext")
+    selftext = submission.get("selftext_html")
     if selftext:
         for uri in iter_uris(selftext):
             yield uri
