@@ -351,8 +351,57 @@ def load(fileobj=None, filename=None):
         with codecs.open(input_filename, 'r', encoding='utf-8') as fp:
             return json.load(fp)
 
+from collections import OrderedDict
 
 
+def merge_json_files(filenames):
+    """
+    hack to merge json data files
+
+    (would be much faster as a merge/concatenation in pandas)
+    """
+
+    sections = ('comments', 'submissions')
+    all_data = {}
+    for section in sections:
+        all_data[section] = OrderedDict()
+    all_data['_meta'] = {}
+    all_data['_meta']['merged_from'] = OrderedDict()
+
+    for filename in filenames:
+        log.info("loading: %r" % filename)
+        data = load(filename=filename)
+        log.info(data.get('_meta'))
+        all_data['_meta']['merged_from'][filename] = data.get('_meta')
+        for subset in sections:
+            all_objects = all_data[subset]
+            objects = data[subset]
+            log.info("%-14s: %d" % (subset, len(objects)))
+            for item in objects:
+                _id = item['id']
+                if _id not in all_objects:
+                    all_objects[_id] = item
+                else:  # item exists
+                    existing = all_objects[_id]
+                    if 'edited' in item and item['edited']:
+                        if item['edited'] > existing['edited']:
+                            #log.debug("edited: %s" % item)
+                            all_objects[_id] = item
+                    else:
+                        #TODO
+                        #print("TODO")
+                        pass
+        for subset in sections:
+            log.info("subtotal      : %d %s" % (len(all_data[subset]), subset))
+
+    final_data = dict.fromkeys(sections, [])
+    for subset in sections:
+        final_data[subset] = sorted(
+            all_data[subset].itervalues(),
+            key=lambda x: x['created_utc'],
+            reverse=True,  # TODO
+        )
+    return final_data
 
 
 def site_frequencies(uri_iterable):
@@ -456,6 +505,7 @@ def main():
     import optparse
     import logging
     import datetime
+    import sys
 
     prs = optparse.OptionParser(usage="./%prog <username>")
 
@@ -492,6 +542,10 @@ def main():
                    default='data.json',
                    )
 
+    prs.add_option('-m', '--merge-json',
+                   dest='merge_json',
+                   action='store_true')
+
     prs.add_option('-v', '--verbose',
                     dest='verbose',
                     action='store_true',)
@@ -511,10 +565,15 @@ def main():
             logging.getLogger().setLevel(logging.DEBUG)
 
     if opts.run_tests:
-        import sys
         sys.argv = [sys.argv[0]] + args
         import unittest
         sys.exit(unittest.main())
+
+    if opts.merge_json:
+        filenames = args
+        data = merge_json_files(filenames)
+        dump(data, opts.json_filename)
+        sys.exit(0)
 
     username = None
     if (opts.backup):
@@ -550,6 +609,7 @@ def main():
             sys.stdout.write(opts.output_html)
         else:
             write_html(opts.html_output_filename, output_html)
+
 
 
 
