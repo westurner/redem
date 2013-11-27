@@ -364,7 +364,7 @@ def load(fileobj=None, filename=None):
 from collections import OrderedDict
 
 
-def merge_json_files(filenames):
+def merge_json_files(filenames, data=None):
     """
     hack to merge json data files
 
@@ -372,11 +372,14 @@ def merge_json_files(filenames):
     """
 
     sections = ('comments', 'submissions')
-    all_data = {}
+    all_data = data if data else OrderedDict()
     for section in sections:
-        all_data[section] = OrderedDict()
-    all_data['_meta'] = {}
-    all_data['_meta']['merged_from'] = OrderedDict()
+        if section not in all_data:
+            all_data[section] = OrderedDict()
+    if '_meta' not in all_data:
+        all_data['_meta'] = {}
+    if 'merged_from' not in all_data['_meta']:
+        all_data['_meta']['merged_from'] = OrderedDict()
 
     for filename in filenames:
         log.info("loading: %r" % filename)
@@ -405,6 +408,7 @@ def merge_json_files(filenames):
             log.info("subtotal      : %d %s" % (len(all_data[subset]), subset))
 
     final_data = dict.fromkeys(sections, [])
+    final_data['_meta'] = all_data['_meta']
     for subset in sections:
         final_data[subset] = sorted(
             all_data[subset].itervalues(),
