@@ -159,7 +159,7 @@ def iter_uris(text, filterfunc=None):
     :param filterfunc: callable to filter urls, defaults to .startswith('http')
     """
     if filterfunc is None:
-        filterfunc = lambda uri: uri[4].lower() == 'http'
+        filterfunc = lambda uri: uri[:4].lower() == 'http'
 
     for uri in uri_rgx.findall(text):
         if filterfunc(uri):
