@@ -12,20 +12,6 @@
 
         <link rel="stylesheet" href="{{ MEDIA_URL }}css/bootstrap.min.css">
         <style>
-            body {
-                padding-top: 60px;
-                padding-bottom: 40px;
-            }
-
-            .anchor {
-                /* scroll-spy + fixed navbar = broken */
-                /*
-                padding-top: 40px;
-                margin-top: -40px;
-                */
-                display: inline-block; /* required for webkit browsers */
-            }
-
             a.headerlink {
                 color: #F2F2F2;
                 padding: 0 4px 0 4px;
@@ -68,10 +54,9 @@
 
         <script src="{{ MEDIA_URL }}js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
     </head>
-    <body data-spy="scroll" data-target=".navbar">
+    <body>
         <!-- This code is taken from http://twitter.github.com/bootstrap/examples/hero.html -->
-        <a id="top">&nbsp;</a>
-        <div class="navbar navbar-fixed-top">
+        <div class="navbar navbar-static-top">
             <div class="navbar-inner">
                 <div class="container">
                     <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
