@@ -8,6 +8,7 @@ INSTALL_REQUIRES=[
     'praw',
     'rfc3987',
     'BeautifulSoup4',
+    'URLObject',
     'Jinja2',
     'requests_cache',
 ]

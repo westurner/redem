@@ -16,6 +16,7 @@ __USER_AGENT__ = '%s (praw)\%s' % (__APPNAME__, __VERSION__)
 import datetime
 import logging
 import os.path
+import urlobject
 import rfc3987
 import bs4
 import praw
@@ -210,21 +211,74 @@ def iter_submission_uris(submission):
             yield uri
 
 
+def read_https_domains(filename):
+    https_domains = {}
+    with open(filename, 'r') as f:
+        https_domains = {
+            domain.rstrip(): 1
+            for domain in f.read().split('\n')}
+    return https_domains
+
+
+https_domains_file = os.path.join(
+    os.path.dirname(__file__),
+    '..', 'data', 'https_domains.txt')
+ALWAYS_HTTPS = read_https_domains(https_domains_file)
+
+
+def httpsify(url):
+    if url.netloc in ALWAYS_HTTPS:
+        url = url.with_scheme('https')
+    elif url.netloc.endswith('readthedocs.org'):
+        url = url.with_scheme('https')
+    return url
+
+netloc_mappings_file = os.path.join(
+    os.path.dirname(__file__),
+    '..', 'data', 'netloc_mappings.txt')
+
+
+def read_netloc_mappings(filename):
+    netloc_mappings = None
+    with open(filename) as f:
+        netloc_mappings = dict(
+            tuple(x.rstrip().split()) for x in f.readlines())
+    return netloc_mappings
+NETLOC_MAPPINGS = read_netloc_mappings(netloc_mappings_file)
+
+
+def normalize_netloc(url):
+    norm_netloc = NETLOC_MAPPINGS.get(url.netloc)
+    if norm_netloc:
+        url = url.with_netloc(norm_netloc)
+    elif url.netloc.endswith('rtfd.org'):
+        url = url.with_netloc(
+            u'.'.join((url.netloc.split('.')[:-2] + ['readthedocs.org'])))
+    elif url.netloc.endswith('github.com'):
+        components = url.netloc.split('.')
+        if (len(components) == 3 and components[0] not in (
+                'help', 'status', 'gist')):
+            url = url.with_netloc(u'.'.join(components[:-1] + ['io']))
+    return url
+
+
 def canonicalize_uri(uri):
-    _uri = None
-    _uri_lower = uri[7].lower()
-    if _uri_lower.startswith('https:'):
-        _uri = uri[6:]
-    elif _uri_lower.startswith('http:'):
-        _uri = uri[5:]
+    url = urlobject.URLObject(uri)
+
+    url = normalize_netloc(url)
+
+    if url.scheme:
+        if not url.startswith(url.scheme):
+            url = url.with_scheme(url.scheme)
+
+        url = httpsify(url)
     else:
-        _uri = uri
-    if _uri.startswith('//'):
-        _uri = _uri[2:]
-    if uri.startswith('//en.m.wikipedia.org'):
-        _uri = uri.replace('en.m.wikipedia.org', 'en.wikipedia.org')
+        if url.netloc == '':
+            if url.path.startswith('/r/') or url.path.startswith('/u/'):
+                url = url.with_netloc('www.reddit.com').with_scheme('http')
+
     # TODO: no path :: trailing slash wrd.nu wrd.nu/
-    return _uri
+    return url
 
 URIThing = collections.namedtuple(
     'URIThing',
@@ -336,17 +390,16 @@ def redem(username, output_filename='data.json'):
         #'liked': [liked_to_dict(l) for l in liked]
     }
 
+    return data
+
+
+def process_urls(data):
     uri_iter = iter_all_uris(data)
     uris = sorted(uri_iter)
-    # OrderedDefaultDict (OrderedCounter)
-
     uri_refs = URIRefCounter.group_and_count(uris)
-
-    data['uris'] = sorted(
+    return sorted(
         ((x[0], x[1]) for x in uri_refs.counts()),
         key=itemgetter(0))
-
-    return data
 
 
 def expand_path(filename):
@@ -449,6 +502,7 @@ def prepare_context_data(data):
     html_keys = {'body_html': 0, 'selftext_html': 0}
     link_keys = {'permalink': 0, 'link': 0}
     date_keys = {'created': 0, 'created_utc': 0, 'edited': 0}
+    data['uris'] = process_urls(data)
     for subset in ('comments', 'submissions'):
         _objs = data[subset]
         for _data in _objs:
