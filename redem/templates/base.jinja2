@@ -159,7 +159,7 @@
         <script src="{{ MEDIA_URL }}js/plugins.js"></script>
         <script src="{{ MEDIA_URL }}js/main.js"></script>
 
-        {% block extrajs %}
+        {% block js %}
         <!-- tablesorter -->
 	    <!-- Pick a theme, load the plugin & initialize plugin -->
         <link href="{{ MEDIA_URL }}css/theme.default.css" rel="stylesheet">
@@ -186,8 +186,7 @@
             odd        : 'odd'  // even row zebra striping,
         });
 
-        $(function(){
-            $('table.tablesorter').tablesorter({
+        var tablesorter_options = {
                 // this will apply the bootstrap theme if "uitheme" widget is included
                 // the widgetOptions.uitheme is no longer required to be set
                 theme : "bootstrap",
@@ -206,7 +205,18 @@
                     filter_reset : ".reset",
                     stickyheaders: 'tablesorter-stickyHeader',
                 }
-            });
+        };
+
+        $(document).ready(function() {
+            $('table.tablesorter th').click(
+                function(ev) {
+                    var table = $(this).parents('table.tablesorter');
+                    if ( table.attr("ts_loaded") !== "true") {
+                        $(table).tablesorter(tablesorter_options);
+                        table.attr("ts_loaded", true);
+                        console.log(table.attr("ts_loaded"));
+                    };
+                });
         });
         </script>
         <style>
@@ -218,6 +228,8 @@
                 background: white;
             }
         </style>
+        {% endblock js %}
+        {% block extrajs %}
         {% endblock extrajs %}
         {#
         {% block tracking %}
