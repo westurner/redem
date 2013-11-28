@@ -12,7 +12,10 @@
       <div id="meta">
         <table class="table table-bordered table-hover table-condensed">
         {% for key in data['_meta'] %}
-        <tr class="comment_{{key}}"><td >{{ key }}</td><td>{{ data['_meta'][key] }}</td></tr>
+        <tr class="comment_{{key}}">
+            <td>{{ key }}</td>
+            <td>{{ data['_meta'][key] }}</td>
+        </tr>
         {%- endfor -%}
       </table>   
       </div>
@@ -34,7 +37,7 @@
       {% for comment in data['comments'] %}
       <tr>
        <td style="white-space:nowrap">{{ comment['created'] }}</td>
-       <td><a href="#comment/{{ comment['id'] }}">{{ comment['link_title'] }}</td>
+       <td><a href="#comment/{{ comment['id'] }}">{{ comment['link_title'] }}</a></td>
        <td>{{ comment['subreddit'] }}</td>
        <td>{{ comment['charcount'] }}</td>
        <td>{{ comment['score'] }}</td>
@@ -49,9 +52,7 @@
 
 
       <h4>
-        <a class="anchor" id="comment/{{ comment['id'] }}" href="{{ comment['permalink'] }}">
-        {{ comment['link_title'] }}
-        </a>
+        <a class="anchor" id="comment/{{ comment['id'] }}" href="{{ comment['permalink'] }}">{{ comment['link_title'] }}</a>
         <a class="headerlink" href="#comment/{{ comment['id'] }}">¶</a>
       </h4>
 
@@ -61,8 +62,7 @@
       {% if comment['edited'] %}<strong>*</strong></span>
       <span><small>{{ comment['edited'] }}</small></span>
       {% else %}</span>{% endif %}
-      <span><small><a href="http://reddit.com/r/{{ comment['subreddit'] }}">
-       #{{ comment['subreddit'] }}</a></small></span>
+      <span><small><a href="http://reddit.com/r/{{ comment['subreddit'] }}">#{{ comment['subreddit'] }}</a></small></span>
       </div>
 
       <div class="comment_body well_ well-small">{{ comment['body_html']|safe }}</div>
@@ -95,7 +95,7 @@
       {% for submission in data['submissions'] %}
       <tr>
        <td style="white-space:nowrap">{{ submission['created'] }}</td>
-       <td><a href="#submission/{{ submission['id'] }}">{{ submission['title'] }}</td>
+       <td><a href="#submission/{{ submission['id'] }}">{{ submission['title'] }}</a></td>
        <td>{{ submission['subreddit'] }}</td>
        <td>{{ submission['charcount'] }}</td>
        <td>{{ submission['score'] }}</td>
