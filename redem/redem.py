@@ -186,7 +186,7 @@ def iter_uris_bs4(text):
     for link in links:
         yield link.get('href')  # link.text
 
-iter_uris = iter_uris_regex
+iter_uris = iter_uris_bs4
 
 
 def iter_comment_uris(comment):
@@ -520,7 +520,7 @@ class Test_redem(unittest.TestCase):
         output = redem_summary(data)
         assert '<title>' in output
 
-    def test_iter_uris(self):
+    def test_iter_uris_regex(self):
         text = (
             u'https://en.wikipedia.org/wiki/Command-line_interface\n'
             '\nhttps://en.wikipedia.org/wiki/Command-line_argument_'
@@ -539,8 +539,15 @@ class Test_redem(unittest.TestCase):
             '.html\n\nFrom [the list of PyPi Trove Classifiers]'
             '(https://pypi.python.org/pypi?%3Aaction=list_classifiers):'
             '\n\n    Environment :: Console\n')
-        uris = list(iter_uris(text))
+        uris = list(iter_uris_regex(text))
         self.assertTrue(len(uris))
+
+    def test_iter_uris_bs4(self):
+        text = (
+            '<a href="http://example.org">example</a>'
+            '<a href="example.org">example<>')
+        uris = list(iter_uris_bs4(text))
+        self.assertEqual(len(uris), 2)
 
 
 def main():
