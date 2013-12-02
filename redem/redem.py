@@ -604,13 +604,13 @@ class Test_redem(unittest.TestCase):
         self.assertEqual(len(uris), 2)
 
 
-def main():
+def main(*args):
     import optparse
     import logging
-    import datetime
     import sys
 
-    prs = optparse.OptionParser(usage="./%prog <username>")
+    prs = optparse.OptionParser(
+        usage="%prog -u <username>  [--backup] [--merge] [--html]")
 
     prs.add_option(
         '-u', '--username',
@@ -635,12 +635,7 @@ def main():
         '-o', '--html-output',
         dest='html_output_filename',
         action='store',
-        #default='-',
-        default=(
-            'report_%s.html' % (
-                datetime.datetime.now().strftime('%Y%M%D%h%m')
-            ))
-        )
+        default='redditlog.html',)
     prs.add_option(
         '--media-url',
         dest='media_url',
@@ -652,11 +647,11 @@ def main():
         '-j', '--json',
         dest='json_filename',
         action='store',
-        default='data.json',
+        default='redditlog_data.json',
         )
 
     prs.add_option(
-        '-m', '--merge-json',
+        '-m', '--merge',
         dest='merge_json',
         action='store_true')
 
@@ -673,7 +668,8 @@ def main():
         dest='run_tests',
         action='store_true', )
 
-    (opts, args) = prs.parse_args()
+    args = args and list(args) or sys.argv[1:]
+    (opts, args) = prs.parse_args(args)
 
     if not opts.quiet:
         logging.basicConfig()
@@ -699,6 +695,8 @@ def main():
             "ERROR: Must specify a username with either"
             " -u/--username or by setting REDDIT_USERNAME",
             file=sys.stderr)
+
+    if not any((opts.backup, opts.html_report, opts.merge_json)):
         prs.print_help()
         sys.exit(1)
 
@@ -721,7 +719,7 @@ def main():
         data = redem(username, opts.backup)
         dump(data, filename=opts.json_filename)
 
-    if data is None:
+    if data is None and opts.json_filename:
         data = load(filename=opts.json_filename)
 
     if opts.html_report:
@@ -730,7 +728,6 @@ def main():
             media_url=opts.media_url,
             username=username)
         if opts.html_output_filename.strip() == '-':
-            import sys
             sys.stdout.write(opts.output_html)
         else:
             write_html(opts.html_output_filename, output_html)
