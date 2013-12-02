@@ -613,6 +613,11 @@ def main():
     prs = optparse.OptionParser(usage="./%prog <username>")
 
     prs.add_option(
+        '-u', '--username',
+        dest='username',
+        action='store')
+
+    prs.add_option(
         '-b', '--backup',
         dest='backup',
         action='store_true')
@@ -681,19 +686,27 @@ def main():
         import unittest
         sys.exit(unittest.main())
 
+    username = None
+    if opts.username:
+        username = opts.username
+    else:
+        username = os.environ.get('REDDIT_USERNAME')
+        if not opts.merge_json:
+            if len(args):
+                username = args[0]
+    if username is None:
+        print(
+            "ERROR: Must specify a username with either"
+            " -u/--username or by setting REDDIT_USERNAME",
+            file=sys.stderr)
+        prs.print_help()
+        sys.exit(1)
+
     if opts.merge_json:
         filenames = args
         data = merge_json_files(filenames)
         dump(data, opts.json_filename)
         sys.exit(0)
-
-    username = None
-    if (opts.backup):
-        if not len(args):
-            raise Exception("must specify a username")
-
-    if len(args):
-        username = args[0]
 
     if not opts.no_cache:
         import requests_cache
