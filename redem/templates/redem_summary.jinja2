@@ -63,6 +63,7 @@
       <span><small>{{ comment['edited'] }}</small></span>
       {% else %}</span>{% endif %}
       <span><small><a href="http://reddit.com/r/{{ comment['subreddit'] }}">#{{ comment['subreddit'] }}</a></small></span>
+      <span><small><a class="headerlink" href="#top">^</a></small></span>
       </div>
 
       <div class="comment_body well_ well-small">{{ comment['body_html']|safe }}</div>
@@ -127,6 +128,7 @@
             <span><small>{{ submission['edited'] }}</small></span>
             {% else %}</span>{% endif %}
             <span><small>{{ submission['subreddit'] }}</small></span>
+            <span><small><a class="headerlink" href="#top">^</a></small></span>
         </div>
         {#<a class="btn btn-link" data-toggle="collapse" data-target="#stbl_{{ submission['id'] }}"><i class="icon-chevron-down"></i></a>
         <!--
