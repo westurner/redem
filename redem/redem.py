@@ -9,20 +9,27 @@ redem - backup personal reddit history for easier local search
 
 https://github.com/reddit/reddit/wiki/API
 """
+import bs4
+import codecs
+import collections
+import datetime
+import json
+import logging
+import os.path
+import praw
+import rfc3987
+import unittest
+import urlobject
+import urlparse
+from collections import Counter
+from collections import OrderedDict
+from jinja2 import Environment, PackageLoader  # FileSystemLoader
+from jinja2 import Markup
+from operator import attrgetter, itemgetter
+
 __APPNAME__ = "redem"
 __VERSION__ = "0.0.4"
 __USER_AGENT__ = '%s (praw)\%s' % (__APPNAME__, __VERSION__)
-
-import datetime
-import logging
-import os.path
-import urlobject
-import rfc3987
-import bs4
-import praw
-from jinja2 import Markup
-import collections
-from operator import attrgetter, itemgetter
 
 uri_rgx = rfc3987.get_compiled_pattern('URI')  # URI_reference
 log = logging.getLogger('%s.cli' % __APPNAME__)
@@ -405,7 +412,6 @@ def process_urls(data):
 def expand_path(filename):
     return os.path.abspath(os.path.expanduser(filename))
 
-import json
 
 
 def dump(data, filename=None):
@@ -413,7 +419,6 @@ def dump(data, filename=None):
     with codecs.open(output_filename, 'w+', encoding='utf-8') as fp:
         return json.dump(data, fp)
 
-import codecs
 
 
 def load(fileobj=None, filename=None):
@@ -424,7 +429,6 @@ def load(fileobj=None, filename=None):
         with codecs.open(input_filename, 'r', encoding='utf-8') as fp:
             return json.load(fp)
 
-from collections import OrderedDict
 
 
 def merge_json_files(filenames, data=None):
@@ -482,10 +486,6 @@ def merge_json_files(filenames, data=None):
 
 
 def site_frequencies(uri_iterable):
-    import urlparse
-    from collections import Counter
-    from operator import attrgetter
-
     attrs = attrgetter('netloc', 'path', 'query')  # TODO: fragment
     url_stemmer = lambda x: attrs(urlparse.urlparse(x))
     url_counts = Counter(url_stemmer(uri) for uri in uri_iterable).items()
@@ -537,7 +537,6 @@ def redem_summary_context(data, **kwargs):
 
 
 def get_template_env():
-    from jinja2 import Environment, PackageLoader  # FileSystemLoader
     env = Environment(
         #loader=FileSystemLoader(os.path.dirname(__file__)),
         loader=PackageLoader('redem', 'templates'),
@@ -557,7 +556,6 @@ def write_html(filename, content):
     with codecs.open(filename, 'w+', encoding='utf-8') as fp:
         fp.write(content)
 
-import unittest
 
 
 class Test_redem(unittest.TestCase):
