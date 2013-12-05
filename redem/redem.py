@@ -499,10 +499,10 @@ def redem_summary_context(data, **kwargs):
     context = {}
     context['username'] = data.get('_meta', {}).get('username')
     context['data'] = prepare_context_data(data)
-    context['title'] = (
-        Markup(u"@%s -- redditlog") % context['username']
-    )
-    context.update(kwargs)  # TODO, FIXME, XXX
+    context.update(kwargs)
+    context['title'] = context.get(
+        'title',
+        Markup(u"@%s -- redditlog") % context['username'])
     return context
 
 
