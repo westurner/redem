@@ -9,23 +9,22 @@ redem - backup personal reddit history for easier local search
 
 https://github.com/reddit/reddit/wiki/API
 """
-import bs4
 import codecs
 import collections
 import datetime
 import json
 import logging
 import os.path
+import unittest
+import urlparse
+from collections import Counter, OrderedDict
+from operator import attrgetter, itemgetter
+
+import bs4
 import praw
 import rfc3987
-import unittest
 import urlobject
-import urlparse
-from collections import Counter
-from collections import OrderedDict
-from jinja2 import Environment, PackageLoader  # FileSystemLoader
-from jinja2 import Markup
-from operator import attrgetter, itemgetter
+from jinja2 import Markup, Environment, PackageLoader
 
 __APPNAME__ = "redem"
 __VERSION__ = "0.0.4"
