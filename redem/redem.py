@@ -272,7 +272,6 @@ def canonicalize_uri(uri):
         if url.netloc == '':
             if url.path.startswith('/r/') or url.path.startswith('/u/'):
                 url = url.with_netloc('www.reddit.com').with_scheme('http')
-
     # TODO: no path :: trailing slash wrd.nu wrd.nu/
     return url
 
@@ -298,7 +297,6 @@ def iter_all_uris(data):
 
 
 class URIRefCounter(collections.OrderedDict):
-
     @staticmethod
     def keyfunc(obj):
         return obj.canonical_uri
@@ -353,7 +351,6 @@ class URIRefCounter(collections.OrderedDict):
         url_counts = Counter(url_stemmer(uri) for uri in uri_iterable).items()
         by_freq = sorted(url_counts, key=lambda x: x[1], reverse=True)
         by_site = sorted(url_counts, key=lambda x: x[0])
-
         return {'by_freq': by_freq,
                 'by_site': by_site}
 
@@ -376,10 +373,8 @@ def redem(username, output_filename='data.json'):
     r.config.decode_html_entities = True  # XXX
     r.login(username)
     user = r.get_redditor(username)
-
     comments = iter_comments(user)
     submissions = iter_submissions(user)
-
     data = {
         '_meta': {
             'date_utc': str(datetime.datetime.utcnow()),
@@ -389,7 +384,6 @@ def redem(username, output_filename='data.json'):
         'submissions': [submission_to_dict(s) for s in submissions],
         #'liked': [liked_to_dict(l) for l in liked]
     }
-
     return data
 
 
@@ -437,7 +431,6 @@ def merge_json_files(filenames, data=None):
         all_data['_meta'] = {}
     if 'merged_from' not in all_data['_meta']:
         all_data['_meta']['merged_from'] = OrderedDict()
-
     for filename in filenames:
         log.info("loading: %r" % filename)
         data = load(filename=filename)
@@ -463,7 +456,6 @@ def merge_json_files(filenames, data=None):
                         pass
         for subset in sections:
             log.info("subtotal      : %d %s" % (len(all_data[subset]), subset))
-
     final_data = dict.fromkeys(sections, [])
     final_data['_meta'] = all_data['_meta']
     for subset in sections:
@@ -540,7 +532,6 @@ class Test_redem(unittest.TestCase):
     def test_redem_summary(self):
         data = load(filename='../data/data.json')
         self.assertTrue(data)
-
         output = redem_summary(data)
         assert '<title>' in output
 
@@ -643,7 +634,6 @@ def main(*args):
 
     if not opts.quiet:
         logging.basicConfig()
-
         if opts.verbose:
             logging.getLogger().setLevel(logging.DEBUG)
 
