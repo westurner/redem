@@ -175,17 +175,6 @@ def iter_uris_regex(text, filterfunc=None):
             yield uri
         else:
             log.debug('filtered_uri: %r' % uri)
-            # TODO: URI CURIEs (dbpedia-owl:Thing)
-            # assert ':' in uri
-            # prefix, rest = uri.split(':',1)[0], rest
-            # prefix = uri.schema
-            # rest = (uri.host, uri.port, uri.path, uri.query,
-            #        uri.fragment)
-            # prefix_uri = ONTOLOGY_CONTEXT.get(prefix, None)
-            # if prefix_uri:
-            #    yield urljoin(prefix_uri, rest)
-            #
-            # TODO: PIP urls (git+git://, git+https://, hg+https://)
 
 
 def iter_uris_bs4(text):
@@ -378,14 +367,7 @@ def redem(username, output_filename='data.json'):
     user = r.get_redditor(username)
 
     comments = iter_comments(user)
-    #comments = list( iter_comments(user) )
-    #print(len(comments))
     submissions = iter_submissions(user)
-    #submissions = list( iter_submissions(user) )
-    #print(len(submissions))
-    #liked = iter_liked(user)
-    #liked = list( iter_liked(user) )
-    #print(len(liked))
 
     data = {
         '_meta': {
@@ -413,12 +395,10 @@ def expand_path(filename):
     return os.path.abspath(os.path.expanduser(filename))
 
 
-
 def dump(data, filename=None):
     output_filename = expand_path(filename)
     with codecs.open(output_filename, 'w+', encoding='utf-8') as fp:
         return json.dump(data, fp)
-
 
 
 def load(fileobj=None, filename=None):
@@ -428,7 +408,6 @@ def load(fileobj=None, filename=None):
     elif filename:
         with codecs.open(input_filename, 'r', encoding='utf-8') as fp:
             return json.load(fp)
-
 
 
 def merge_json_files(filenames, data=None):
@@ -557,14 +536,7 @@ def write_html(filename, content):
         fp.write(content)
 
 
-
 class Test_redem(unittest.TestCase):
-    #def test_redem(self):
-    #    uris = list( redem('westurner', limit=2000) )
-    #    stats = site_frequencies(uris)
-    #    from pprint import pprint
-    #    print(pprint(stats))
-
     def test_redem_summary(self):
         data = load(filename='../data/data.json')
         self.assertTrue(data)
