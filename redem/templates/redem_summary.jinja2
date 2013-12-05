@@ -99,7 +99,7 @@
 
       {% for submission in data['submissions'] %}
       <div class="row-fluid card">
-      <div class="span12">
+      <div class="span12 wrap-break">
         <h4>
             <a class="anchor" id="submission/{{ submission['id'] }}" href="{{ submission['permalink'] }}">
             {{ submission['title']|safe }} {# TODO XXX FIXME #}
@@ -132,8 +132,8 @@
       </h2>
 
       <table 
-          class="table table-border table-striped table-hover table-condensed tablesorter"
-          style="table-layout:fixed; word-wrap: break-word;"
+          class="table table-border table-striped table-hover table-condensed tablesorter wrap-break"
+          style="table-layout:fixed;"
           >
       <thead>
         <th class="filter-false" style="width: 5%">count</th>
