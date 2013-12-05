@@ -346,6 +346,17 @@ class URIRefCounter(collections.OrderedDict):
         #return self.counts()
         return self
 
+    @staticmethod
+    def site_frequencies(uri_iterable):
+        attrs = attrgetter('netloc', 'path', 'query')  # TODO: fragment
+        url_stemmer = lambda x: attrs(urlparse.urlparse(x))
+        url_counts = Counter(url_stemmer(uri) for uri in uri_iterable).items()
+        by_freq = sorted(url_counts, key=lambda x: x[1], reverse=True)
+        by_site = sorted(url_counts, key=lambda x: x[0])
+
+        return {'by_freq': by_freq,
+                'by_site': by_site}
+
 
 def redem(username, output_filename='data.json'):
     """
@@ -462,17 +473,6 @@ def merge_json_files(filenames, data=None):
             reverse=True,  # TODO
         )
     return final_data
-
-
-def site_frequencies(uri_iterable):
-    attrs = attrgetter('netloc', 'path', 'query')  # TODO: fragment
-    url_stemmer = lambda x: attrs(urlparse.urlparse(x))
-    url_counts = Counter(url_stemmer(uri) for uri in uri_iterable).items()
-    by_freq = sorted(url_counts, key=lambda x: x[1], reverse=True)
-    by_site = sorted(url_counts, key=lambda x: x[0])
-
-    return {'by_freq': by_freq,
-            'by_site': by_site}
 
 
 def prepare_context_data(data):
