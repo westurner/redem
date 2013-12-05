@@ -68,15 +68,6 @@
       </div>
 
       <div class="comment_body well_ well-small">{{ comment['body_html']|safe }}</div>
-
-      {#<!--
-      <table class="table table-striped table-hover table-condensed">
-        {% for key in comment %}
-        <tr class="comment_{{key}}"><td >{{ key }}</td><td>{{ comment[key] }}</td></tr>
-        {%- endfor -%}
-      </table>
-      -->#}
-      {#<pre class="pre-scrollable">{{ comment }}</pre>#}
       </div>
       </div>
       {% endfor %}
@@ -131,16 +122,6 @@
             <span><small>{{ submission['subreddit'] }}</small></span>
             <span><small><a class="headerlink" href="#top">^</a></small></span>
         </div>
-        {#<a class="btn btn-link" data-toggle="collapse" data-target="#stbl_{{ submission['id'] }}"><i class="icon-chevron-down"></i></a>
-        <!--
-        <table id="stbl_{{ submission['id'] }}" class="table table-striped table-hover table-condensed collapse">
-            {% for key in submission %}
-            <tr class="submission_{{key}}"><td >{{ key }}</td><td>{{ submission[key] }}</td></tr>
-            {%- endfor -%}
-        </table>
-        <pre class="pre-scrollable">{{ submission }}</pre>
-        -->
-        #}
       </div>
       </div>
       {% endfor %}
