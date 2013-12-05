@@ -2,26 +2,26 @@
 #
 # Usage:
 # -------
-# automated::
+# Automated::
 #
-#	$ export REDDIT_USERNAME="<username>"
-#	$ make backup_redditlog
-#	# <enter password>
-#	$ make [view]
+#    $ export REDDIT_USERNAME="<username>"
+#    $ make backup_redditlog
+#    # <enter password>
+#    $ make [view]
 #
-# manual::
+# Manual::
 #
-#	$ export REDDIT_USERNAME="<username>"
-#	$ make backup_and_review	# fetch recent 1000 comments, submissions
-#								# and view the generated json
-#	# <enter password>
-#	$ make merge				# merge all ./data/*data*.json files
-#	$ make redditlog			# generate index.html and static files
-#								# making separate commits for
-#								# * static files
-#								# * data (JSON, index.html)
-#	$ make [view]  				# open generated index.html locally
-#	$ make push_redditlog 		# git push generated page to origin gh-pages
+#    $ export REDDIT_USERNAME="<username>"
+#    $ make backup_and_review    # fetch recent 1000 comments, submissions
+#                                # and view the generated json
+#    # <enter password>
+#    $ make merge                # merge all ./data/*data*.json files
+#    $ make redditlog            # generate index.html and static files
+#                                # making separate commits for
+#                                # * static files
+#                                # * data (JSON, index.html)
+#    $ make [view]               # open generated index.html locally
+#    $ make push_redditlog       # git push generated page to origin gh-pages
 #
 #
 # Files
@@ -29,15 +29,15 @@
 #
 # Three (3) JSON Files::
 #
-# 	JSONDL   	= ./data/redemdata.$(date).json  	# per-backup JSON
-# 	JSONMERGED	= ./data/merged_json.json			# merged JSON
-# 	JSONDATA 	= ../redditlog/data/redemdata.json	# redditlog JSON copy
+#     JSONDL       = ./data/redemdata.$(date).json      # per-backup JSON
+#     JSONMERGED   = ./data/merged_json.json            # merged JSON
+#     JSONDATA     = ../redditlog/data/redemdata.json   # redditlog JSON copy
 #
 # Redditlog static webpage (e.g. for a `gh-pages` GitHub pages branch)::
 #
-#	HTMLINDEX 	= index.html	# HTML (TOC, Comments, Submissions, URLs)
-#	STATICFILES = static/		# Static JS, CSS for index.html
-#	JSONDATA 	= data/redemdata.json				# redditlog JSON copy
+#    HTMLINDEX    = index.html     # HTML (TOC, Comments, Submissions, URLs)
+#    STATICFILES  = static/        # Static JS, CSS for index.html
+#    JSONDATA     = data/redemdata.json                 # redditlog JSON copy
 
 
 _DATE:=			$(shell date +%Y%m%d-%H%M)
