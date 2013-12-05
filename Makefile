@@ -61,9 +61,8 @@ static:
 
 backup:
 	echo "backing up to $(_JSONDL)" && \
-	$(_REDEM_BIN) \
+	$(_REDEM_BIN) --verbose \
 		--backup \
-		--verbose \
 		--json=$(_JSONDL) \
 		--username=$(REDDIT_USERNAME) && \
 	echo "Backed up to $(_JSONDL)"
@@ -72,12 +71,14 @@ backup_and_review: backup
 	python -m json.tool $(_JSONDL) | less
 
 merge:
-	$(_REDEM_BIN) \
+	$(_REDEM_BIN) --verbose \
 		--merge \
-		--verbose \
 		--json=$(_JSONMERGED) \
-		--username=$(REDDIT_USERNAME) \  # TODO
-		$(find . -iname '*data*.json')
+		--username=$(REDDIT_USERNAME) \
+		$(shell find . -type f -iname '*data*.json')
+
+view_merged:
+	python -m json.tool $(_JSONMERGED)
 
 template:
 	$(_REDEM_BIN) --verbose \
