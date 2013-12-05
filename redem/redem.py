@@ -577,21 +577,26 @@ def main(*args):
         '-u', '--username',
         dest='username',
         action='store')
+    prs.add_option(
+        '-j', '--json',
+        dest='json_filename',
+        action='store',
+        default='redditlog_data.json',
+        )
 
     prs.add_option(
         '-b', '--backup',
         dest='backup',
         action='store_true')
     prs.add_option(
-        '-C', '--no-cache',
-        dest='no_cache',
-        default=False,
+        '-m', '--merge',
+        dest='merge_json',
         action='store_true')
-
     prs.add_option(
         '-r', '--html',
         dest='html_report',
         action='store_true')
+
     prs.add_option(
         '-o', '--html-output',
         dest='html_output_filename',
@@ -605,15 +610,9 @@ def main(*args):
         )
 
     prs.add_option(
-        '-j', '--json',
-        dest='json_filename',
-        action='store',
-        default='redditlog_data.json',
-        )
-
-    prs.add_option(
-        '-m', '--merge',
-        dest='merge_json',
+        '-C', '--no-cache',
+        dest='no_cache',
+        default=False,
         action='store_true')
 
     prs.add_option(
