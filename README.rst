@@ -28,8 +28,8 @@ requires
 --------
 * `praw`_ Python Reddit API
 * `rfc3987`_ URI regexes
-* `BeautifulSoup4`_ <a> tag extraction
-* `Jinja2`_ Templates
+* `BeautifulSoup4`_ ``<a>`` tag extraction
+* `Jinja2`_ templates
 * `requests`_ HTTP urllib3 porcelain
 * `requests_cache`_ caching for `requests`_
 
