@@ -204,11 +204,18 @@ def iter_submission_uris(submission):
 
 
 def read_https_domains(filename):
+    """
+    ::
+
+        github.com
+        en.wikipedia.org
+
+    """
     https_domains = {}
-    with open(filename, 'r') as f:
-        https_domains = {
-            domain.rstrip(): 1
-            for domain in f.read().split('\n')}
+    if os.path.exists(filename):
+        with codecs.open(filename, 'r', encoding='utf8') as f:
+            https_domains = {
+                domain.rstrip(): 1 for domain in f.read().split('\n')}
     return https_domains
 
 
@@ -231,10 +238,17 @@ netloc_mappings_file = os.path.join(
 
 
 def read_netloc_mappings(filename):
-    netloc_mappings = None
-    with open(filename) as f:
-        netloc_mappings = dict(
-            tuple(x.rstrip().split()) for x in f.readlines())
+    """
+    ::
+
+        en.m.wikipedia.org  en.wikipedia.org
+
+    """
+    netloc_mappings = {}
+    if os.path.exists(filename):
+        with codecs.open(filename, 'r', encoding='utf8') as f:
+            netloc_mappings = dict(
+                tuple(x.rstrip().split()) for x in f.readlines())
     return netloc_mappings
 NETLOC_MAPPINGS = read_netloc_mappings(netloc_mappings_file)
 
