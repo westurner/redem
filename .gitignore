@@ -1,0 +1,5 @@
+data/
+redem/static/output.html
+*.pyc
+*.egg-info
+*.un~
