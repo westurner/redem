@@ -54,6 +54,9 @@ _REDEM_BIN:=	redem
 
 default: view
 
+test:
+	python redem/redem.py -t
+
 static:
 	mkdir -p $(_DATADIR)
 	mkdir -p $(_HTMLDIR)

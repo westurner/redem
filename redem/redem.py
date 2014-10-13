@@ -540,7 +540,8 @@ def write_html(filename, content):
 
 class Test_redem(unittest.TestCase):
     def test_redem_summary(self):
-        data = load(filename='../data/data.json')
+        data = load(filename=os.path.join(os.path.dirname(__file__),
+                                          '..', 'data', 'data.json'))
         self.assertTrue(data)
         output = redem_summary(data)
         assert '<title>' in output
@@ -685,7 +686,7 @@ def main(*args):
     if not opts.no_cache:
         import requests_cache
         requests_cache.install_cache(
-            'data/redem',
+            os.path.join('data', 'redem'),
             backend='sqlite',
             expire_after=60 * 60,
             fast_save=True)
