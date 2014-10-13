@@ -133,31 +133,28 @@ def submission_to_dict(submission):
     return _sub
 
 
-def iter_comments(user, limit=None):
-    done = False
-    while not done:
-        comments = user.get_comments(limit=limit)
-        for comment in comments:
-            yield comment
-        done = True
+def iter_comments(user, limit=None, pagesize=None):
+    comments = user.get_comments(limit=pagesize)
+    for i, comment in enumerate(comments):
+        if limit and i >= limit:
+            break
+        yield comment
 
 
-def iter_submissions(user, limit=None):
-    done = False
-    while not done:
-        submissions = user.get_submitted(limit=limit)
-        for submission in submissions:
-            yield submission
-        done = True
+def iter_submissions(user, limit=None, pagesize=None):
+    submissions = user.get_submitted(limit=pagesize)
+    for i, submission in enumerate(submissions):
+        if limit and i >= limit:
+            break
+        yield submission
 
 
-def iter_liked(user, limit=None):
-    done = False
-    while not done:
-        likeds = user.get_liked(limit=limit)
-        for liked in likeds:
-            yield liked
-        done = True
+def iter_liked(user, limit=None, pagesize=None):
+    likeds = user.get_liked(limit=pagesize)
+    for i, liked in enumerate(likeds):
+        if limit and i >= limit:
+            break
+        yield liked
 
 
 def iter_uris_regex(text, filterfunc=None):
@@ -354,7 +351,7 @@ class URIRefCounter(collections.OrderedDict):
                 'by_site': by_site}
 
 
-def redem(username, output_filename='data.json'):
+def redem(username, output_filename='data.json', limit=None):
     """
     fetch reddit comments and submissions, extract URIs,
     serialize to JSON.
@@ -372,8 +369,8 @@ def redem(username, output_filename='data.json'):
     r.config.decode_html_entities = True  # XXX
     r.login(username)
     user = r.get_redditor(username)
-    comments = iter_comments(user)
-    submissions = iter_submissions(user)
+    comments = iter_comments(user, limit=limit)
+    submissions = iter_submissions(user, limit=limit)
     data = {
         '_meta': {
             'date_utc': str(datetime.datetime.utcnow()),
@@ -588,6 +585,13 @@ def main(*args):
         dest='backup',
         action='store_true')
     prs.add_option(
+        '-n', '--limit',
+        dest='limit',
+        type='int',
+        action='store',
+        default=None)
+
+    prs.add_option(
         '-m', '--merge',
         dest='merge_json',
         action='store_true')
@@ -674,7 +678,7 @@ def main(*args):
 
     data = None
     if opts.backup:
-        data = redem(username, opts.backup)
+        data = redem(username, opts.backup, limit=opts.limit)
         dump(data, filename=opts.json_filename)
 
     if data is None and opts.json_filename:

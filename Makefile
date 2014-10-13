@@ -59,12 +59,14 @@ static:
 	mkdir -p $(_HTMLDIR)
 	rsync -avpr $(_STATICFILES) $(_HTMLDIR)
 
+#BACKUP_OPTS="-n 10"
 backup:
 	echo "backing up to $(_JSONDL)" && \
 	$(_REDEM_BIN) --verbose \
 		--backup \
 		--json=$(_JSONDL) \
-		--username=$(REDDIT_USERNAME) && \
+		--username=$(REDDIT_USERNAME) \
+		$(BACKUP_OPTS) && \
 	echo "Backed up to $(_JSONDL)"
 
 backup_and_review: backup
