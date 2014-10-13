@@ -685,7 +685,7 @@ def main(*args):
     if not opts.no_cache:
         import requests_cache
         requests_cache.install_cache(
-            os.path.join('data', 'redem'),
+            os.path.join(DATADIR, 'cache'),
             backend='sqlite',
             expire_after=60 * 60,
             fast_save=True)
