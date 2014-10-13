@@ -219,9 +219,8 @@ def read_https_domains(filename):
     return https_domains
 
 
-https_domains_file = os.path.join(
-    os.path.dirname(__file__),
-    '..', 'data', 'https_domains.txt')
+DATADIR = os.path.join(os.path.dirname(__file__), '..', 'data')
+https_domains_file = os.path.join(DATADIR, 'https_domains.txt')
 ALWAYS_HTTPS = read_https_domains(https_domains_file)
 
 
@@ -231,10 +230,6 @@ def httpsify(url):
     elif url.netloc.endswith('readthedocs.org'):
         url = url.with_scheme('https')
     return url
-
-netloc_mappings_file = os.path.join(
-    os.path.dirname(__file__),
-    '..', 'data', 'netloc_mappings.txt')
 
 
 def read_netloc_mappings(filename):
@@ -250,6 +245,9 @@ def read_netloc_mappings(filename):
             netloc_mappings = dict(
                 tuple(x.rstrip().split()) for x in f.readlines())
     return netloc_mappings
+
+
+netloc_mappings_file = os.path.join(DATADIR, 'netloc_mappings.txt')
 NETLOC_MAPPINGS = read_netloc_mappings(netloc_mappings_file)
 
 
@@ -540,8 +538,9 @@ def write_html(filename, content):
 
 class Test_redem(unittest.TestCase):
     def test_redem_summary(self):
-        data = load(filename=os.path.join(os.path.dirname(__file__),
-                                          '..', 'data', 'data.json'))
+        DATADIR = os.path.join(os.path.dirname(__file__), '..', 'data')
+        jsondata_filename = os.path.join(DATADIR, 'data.json')
+        data = load(filename=jsondata_filename)
         self.assertTrue(data)
         output = redem_summary(data)
         assert '<title>' in output
