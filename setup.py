@@ -15,7 +15,7 @@ INSTALL_REQUIRES=[
 
 setup(
     name = "redem",
-    version = "0.1.1",
+    version = "0.1.2",
     #author = "",
     #author_email = "wes@wrd.nu",
     #description = (""),
@@ -29,6 +29,7 @@ setup(
         "Development Status :: 3 - Alpha",
         "Topic :: Utilities",
         "License :: OSI Approved :: BSD License",
+        "Programming Language :: Python :: 3 :: Only",
     ],
     entry_points="""\
     [console_scripts]
