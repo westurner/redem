@@ -15,7 +15,7 @@ INSTALL_REQUIRES=[
 
 setup(
     name = "redem",
-    version = "0.1.1",
+    version = "0.1.2",
     #author = "",
     #author_email = "wes@wrd.nu",
     #description = (""),

@@ -27,7 +27,7 @@ import urlobject
 from jinja2 import Markup, Environment, PackageLoader
 
 __APPNAME__ = "redem"
-__VERSION__ = "0.1.1"
+__VERSION__ = "0.1.2"
 __USER_AGENT__ = '%s (praw)\%s' % (__APPNAME__, __VERSION__)
 
 uri_rgx = rfc3987.get_compiled_pattern('URI')  # URI_reference
