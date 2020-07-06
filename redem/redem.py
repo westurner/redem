@@ -16,7 +16,7 @@ import json
 import logging
 import os.path
 import unittest
-import urlparse
+from urllib.parse import urlparse
 from collections import Counter, OrderedDict
 from operator import attrgetter, itemgetter
 
@@ -333,7 +333,7 @@ class URIRefCounter(collections.OrderedDict):
             return l
 
     def counts(self):
-        for key, refs in self.iteritems():
+        for key, refs in self.items():
             yield (key, len(refs), refs)
 
     def print(self, counts=None):
@@ -396,8 +396,8 @@ def redem(username, output_filename='data.json', limit=None):
 
 
 def process_urls(data):
-    uri_iter = iter_all_uris(data)
-    uris = sorted(uri_iter)
+    uri_iter = list(iter_all_uris(data))
+    uris = sorted(uri_iter, key=lambda x: x.canonical_uri)
     uri_refs = URIRefCounter.group_and_count(uris)
     return sorted(
         ((x[0], x[1]) for x in uri_refs.counts()),
@@ -485,7 +485,7 @@ def prepare_context_data(data):
     for subset in ('comments', 'submissions'):
         _objs = data[subset]
         for _data in _objs:
-            for key in _data.keys():
+            for key in list(_data.keys()):
                 if key in html_keys:  # XXX TODO FIXME
                     _orig = _data[key]
                     if _orig:

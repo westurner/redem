@@ -29,6 +29,7 @@ setup(
         "Development Status :: 3 - Alpha",
         "Topic :: Utilities",
         "License :: OSI Approved :: BSD License",
+        "Programming Language :: Python :: 3 :: Only",
     ],
     entry_points="""\
     [console_scripts]
